@@ -1,6 +1,6 @@
-package com.CharacterOrg;
+package CharacterOrg;
 
-import com.CharacterOrg.util.Position;
+import CharacterOrg.util.Position;
 
 public class Character extends Entity {
   private String nameFirst;

@@ -1,6 +1,6 @@
-package com.CharacterOrg;
+package CharacterOrg;
 
-import com.CharacterOrg.util.Position;
+import CharacterOrg.util.Position;
 
 public class Place extends Entity {
   private String name;

@@ -1,9 +1,9 @@
-package com.CharacterOrg;
+package CharacterOrg;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.CharacterOrg.util.Position;
+import CharacterOrg.util.Position;
 
 public class World {
   private String name;

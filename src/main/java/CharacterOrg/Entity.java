@@ -1,10 +1,10 @@
-package com.CharacterOrg;
+package CharacterOrg;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.CharacterOrg.util.Colour;
-import com.CharacterOrg.util.Position;
+import CharacterOrg.util.Colour;
+import CharacterOrg.util.Position;
 
 public class Entity {
   private String notes;

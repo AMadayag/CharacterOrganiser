@@ -1,4 +1,4 @@
-package com.CharacterOrg.util;
+package CharacterOrg.util;
 
 public class Position {
   int x;
