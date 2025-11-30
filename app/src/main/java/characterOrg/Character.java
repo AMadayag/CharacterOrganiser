@@ -1,6 +1,6 @@
-package CharacterOrganiser.app.src.main.java.characterOrg;
+package characterOrg;
 
-import CharacterOrganiser.app.src.main.java.util.Position;
+import characterOrg.util.Position;
 
 public class Character extends Entity {
   private String nameFirst;

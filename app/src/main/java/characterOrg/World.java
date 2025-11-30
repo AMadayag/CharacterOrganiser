@@ -1,15 +1,25 @@
-package CharacterOrganiser.app.src.main.java.characterOrg;
+package characterOrg;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import CharacterOrganiser.app.src.main.java.util.Position;
+import characterOrg.util.Position;
 
 public class World {
+  private String name;
   private List<Entity> entities;
 
   public World() {
     this.entities = new ArrayList<Entity>();
+    this.name = "New World";
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void addName(String name) {
+    this.name = name;
   }
 
   public Character addCharacter(Position pos) {

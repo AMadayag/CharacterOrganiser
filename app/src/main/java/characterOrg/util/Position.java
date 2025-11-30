@@ -1,4 +1,4 @@
-package CharacterOrganiser.app.src.main.java.util;
+package characterOrg.util;
 
 public class Position {
   int x;
