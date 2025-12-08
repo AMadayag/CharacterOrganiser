@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>World Viewer</title>
+  <style>
+    .square {
+      height: 50px;
+      width: 50px;
+      background-color: #555;
+    }
+    </style>
+</head>
+<body>
+  <h1>World Viewer</h1>
+
+  <button onclick="loadWorld()">Load World</button>
+  <button onclick="addCharacter()">Add Character</button>
+
+  <pre id="out"></pre>
+
+  <script>
+    async function loadWorld() {
+      const res = await fetch('/api/world');
+      const world = await res.json();
+      document.getElementById('out').textContent = 
+        JSON.stringify(world, null, 2);
+    }
+
+    async function addCharacter() {
+      const x = prompt("Enter X position:");
+      const y = prompt("Enter Y position:");
+      const pos = { x: Number(x), y: Number(y) };
+      <div class="square"></div>
+      const res = await fetch('/api/world/character', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pos)
+      });
+
+      const newChar = await res.json();
+      alert("Character added at x=" + newChar.position.x);
+      loadWorld();   // refresh display
+    }
+  </script>
+
+</body>
+</html>
