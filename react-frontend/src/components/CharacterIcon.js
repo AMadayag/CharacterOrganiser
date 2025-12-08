@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { iconStyle } from "./iconOverlays";
+import { useXarrow } from "react-xarrows";
 
 function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotesChange }) {
   const [notes, setNotes] = useState("");
   const [relatives, setRelatives] = useState([]);
-  const [openNotes, setOpenNotes] = useState({});
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -14,7 +14,7 @@ function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotes
       const text = await res.text();
       setNotes(text);
     };
-  
+
     const fetchRelatives = async () => {
       const res = await fetch(
         `http://localhost:8080/api/world/entity/${data.id}/relatives`
@@ -23,16 +23,16 @@ function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotes
       setRelatives(r);
     }
 
-    fetchNotes();
     fetchRelatives();
+    fetchNotes();
   }, [data.id]);
 
   return (
     <div
       style={{
         position: "absolute",
-        left: position.x + 170,
-        top: position.y + 25,
+        left: `${position.x + 170}px`,
+        top: `${position.y + 25}px`,
         background: "white",
         padding: "10px",
         border: "1px solid #ccc",
@@ -48,6 +48,7 @@ function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotes
         placeholder="Name"
         style={{ width: "100%", marginBottom: "6px" }}
       />
+
       <select
         value={data.style}
         onChange={(e) => onStyleChange(data.id, e.target.value)}
@@ -59,25 +60,10 @@ function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotes
           </option>
         ))}
       </select>
+
       <details>
         <summary style={{ marginTop: "6px", cursor: "pointer", fontWeight: "bold" }}>
           Notes
-        </summary>
-        <input
-          type="text"
-          value={notes}
-          onChange={(e) => {
-            const newNotes = e.target.value;
-            setNotes(newNotes);
-            onNotesChange(data.id, newNotes);
-          }}
-          placeholder="Notes"
-          style={{ width: "100%", marginTop: "6px" }}
-        />
-      </details>
-      <details>
-        <summary style={{ marginTop: "6px", cursor: "pointer", fontWeight: "bold" }}>
-          Relationships
         </summary>
         <input
           type="text"
@@ -96,10 +82,17 @@ function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotes
   );
 }
 
-export default function CharacterIcon({ data, onStyleChange, onMove, onNameChange, onNotesChange }) {
+export default function CharacterIcon({
+  data,
+  onStyleChange,
+  onMove,
+  onNameChange,
+  onNotesChange,
+}) {
   const [dragging, setDragging] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const offset = useRef({ x: 0, y: 0 });
+  const updateXarrow = useXarrow();
 
   const handleMouseDown = (e) => {
     if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
@@ -109,16 +102,13 @@ export default function CharacterIcon({ data, onStyleChange, onMove, onNameChang
 
     const rect = e.currentTarget.getBoundingClientRect();
     offset.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: e.clientX - data.position.x,
+      y: e.clientY - data.position.y,
     };
   };
 
   const handleDoubleClick = () => {
-    if (showOptions === false)
-      setShowOptions(true);
-    else
-      setShowOptions(false);
+    setShowOptions((prev) => !prev);
   };
 
   useEffect(() => {
@@ -129,7 +119,9 @@ export default function CharacterIcon({ data, onStyleChange, onMove, onNameChang
         x: e.clientX - offset.current.x,
         y: e.clientY - offset.current.y,
       };
+
       onMove(data.id, newPos);
+      updateXarrow();
     };
 
     const handleMouseUp = () => setDragging(false);
@@ -141,20 +133,24 @@ export default function CharacterIcon({ data, onStyleChange, onMove, onNameChang
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragging, onMove, data.id]);
+  }, [dragging, onMove, data.id, updateXarrow]);
 
   return (
     <>
       <div
+        id={`entity-${data.id}`}
         className="character-icon"
         style={{
-          left: data.position.x,
-          top: data.position.y,
-          cursor: dragging ? "grabbing" : "grab",
           position: "absolute",
+          left: `${data.position.x}px`,
+          top: `${data.position.y}px`,
+          width: "90px",
+          height: "110px",
+          cursor: dragging ? "grabbing" : "grab",
+          zIndex: 10,
         }}
         onMouseDown={handleMouseDown}
-        onDoubleClick={handleDoubleClick} // open modal
+        onDoubleClick={handleDoubleClick}
       >
         <img
           src="images/characterIcon/CharacterIconBust.png"
@@ -162,6 +158,7 @@ export default function CharacterIcon({ data, onStyleChange, onMove, onNameChang
           className="icon"
           draggable={false}
         />
+
         {data.style && iconStyle[data.style] && (
           <img
             src={iconStyle[data.style]}
@@ -170,6 +167,7 @@ export default function CharacterIcon({ data, onStyleChange, onMove, onNameChang
             draggable={false}
           />
         )}
+
         <p className="character-name">{data.name}</p>
       </div>
 

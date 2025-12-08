@@ -1,8 +1,6 @@
 import { useState } from "react";
 
-export default function RelationshipForm({ onSubmit, onClose, entities: entitiesObj }) {
-  const entitiesArray = entitiesObj.entities
-
+export default function RelationshipForm({ onSubmit, onClose, entities = [] }) {
   const [id1, setId1] = useState("");
   const [id2, setId2] = useState("");
 
@@ -28,7 +26,7 @@ export default function RelationshipForm({ onSubmit, onClose, entities: entities
         padding: "20px",
         border: "1px solid #ccc",
         boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-        zIndex: 1000,
+        zIndex: 10000,
       }}
     >
       <h3>Add Relationship</h3>
@@ -40,7 +38,7 @@ export default function RelationshipForm({ onSubmit, onClose, entities: entities
           style={{ width: "100%", marginBottom: "10px" }}
         >
           <option value="">Select first character</option>
-          {entitiesArray.map((entity) => (
+          {entities.map((entity) => (
             <option key={entity.id} value={entity.id}>
               {entity.name}
             </option>
@@ -55,7 +53,7 @@ export default function RelationshipForm({ onSubmit, onClose, entities: entities
           style={{ width: "100%", marginBottom: "10px" }}
         >
           <option value="">Select second character</option>
-          {entitiesArray.map((entity) => (
+          {entities.map((entity) => (
             <option key={entity.id} value={entity.id}>
               {entity.name}
             </option>

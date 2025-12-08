@@ -27,6 +27,7 @@ export default function CharacterForm({ onSubmit, onClose }) {
         padding: "20px",
         border: "1px solid #ccc",
         boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+        zIndex: 10000
       }}
     >
       <h3>Add Character</h3>

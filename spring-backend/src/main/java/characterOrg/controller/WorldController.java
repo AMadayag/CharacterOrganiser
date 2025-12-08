@@ -64,7 +64,7 @@ public class WorldController {
 
     @PutMapping("/relationships")
     public void addRelationship(@RequestBody RelationshipRequest r) {
-        world.addRelationship(world.getEntityFromId(r.getId1()),world. getEntityFromId(r.getId1()));
+        world.addRelationship(world.getEntityFromId(r.getId1()),world. getEntityFromId(r.getId2()));
     }
 
     @DeleteMapping("/relationships")

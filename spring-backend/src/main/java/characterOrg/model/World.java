@@ -7,11 +7,10 @@ import characterOrg.model.util.Position;
 
 public class World {
   private String name;
-  private List<Entity> entities;
-  private List<Relationship> relationships;
+  private List<Entity> entities = new ArrayList<Entity>();
+  private List<Relationship> relationships  = new ArrayList<Relationship>();
 
   public World() {
-    this.entities = new ArrayList<Entity>();
     this.name = "New World";
   }
 
