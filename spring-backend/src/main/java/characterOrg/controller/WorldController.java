@@ -1,6 +1,7 @@
 package characterOrg.controller;
 
 import characterOrg.model.Entity;
+import characterOrg.model.Relative;
 import characterOrg.model.World;
 import characterOrg.model.request.EntityRequest;
 import characterOrg.model.request.PositionRequest;
@@ -58,8 +59,21 @@ public class WorldController {
     }
 
     @GetMapping("entity/{id}/relatives")
-    public List<Integer> getRelatives(@PathVariable int id) {
+    public List<Relative> getRelatives(@PathVariable int id) {
         return world.getEntityFromId(id).getRelatives();
+    }
+
+    @PutMapping("/entity/{id}/relative/{relativeId}/info")
+    public void updateRelativeInfo(
+        @PathVariable int id,
+        @PathVariable int relativeId,
+        @RequestBody Map<String, String> body
+    ) {
+        Entity entity = world.getEntityFromId(id);
+        String info = body.get("info");
+        
+        Relative r = entity.getRelativeFromId(relativeId);
+        r.updateInfo(info);
     }
 
     @PutMapping("/relationships")
@@ -70,5 +84,10 @@ public class WorldController {
     @DeleteMapping("/relationships")
     public void removeRelationship(@RequestBody RelationshipRequest r) {
         world.removeRelationship(world.getRelationshipFromId(r.getRId()));
+    }
+
+    @PutMapping("/relationships/{id}/info")
+    public void updateRelationshipInfo(@PathVariable int id, @RequestBody RelationshipRequest r) {
+        world.getRelationshipFromId(id).updateInfo(r.getInfo());
     }
 }

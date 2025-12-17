@@ -12,10 +12,11 @@ export default function WorldView() {
   const [entities, setEntities] = useState([]);
   const [relationships, setRelationships] = useState([]);
   const [arrowsReady, setArrowsReady] = useState(false);
+  const [editingRelId, setEditingRelId] = useState(null);
+  const [editingRelInfo, setEditingRelInfo] = useState("");
 
   useEffect(() => {
     if (entities.length > 0) {
-      // Small delay to ensure DOM elements are rendered
       setTimeout(() => {
         setArrowsReady(true);
       }, 0);
@@ -25,10 +26,6 @@ export default function WorldView() {
   const loadWorld = async () => {
     const res = await fetch("http://localhost:8080/api/world");
     const data = await res.json();
-
-    // console.log("World data:", data);
-    // console.log("Entities:", data.entities);
-    // console.log("Relationships:", data.relationships);
 
     setWorld(data);
     setEntities(data.entities);
@@ -71,7 +68,20 @@ export default function WorldView() {
 
     await loadWorld();
   };
-  
+
+  const updateRelationshipInfo = async (relId, newInfo) => {
+    await fetch(`http://localhost:8080/api/world/relationships/${relId}/info`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ info: newInfo }),
+    });
+
+    setRelationships((prev) =>
+      prev.map((rel) =>
+        rel.id === relId ? { ...rel, info: newInfo } : rel
+      )
+    );
+  };
 
   const handleStyleChange = async (id, newStyle) => {
     await fetch(`http://localhost:8080/api/world/entity/${id}/style`, {
@@ -100,7 +110,7 @@ export default function WorldView() {
       prev.map((c) => (c.id === id ? { ...c, name: newName } : c))
     );
 
-    await fetch(`http://localhost:3000/characters/${id}/name`, {
+    await fetch(`http://localhost:8080/api/world/entity/${id}/name`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName }),
@@ -119,11 +129,27 @@ export default function WorldView() {
     saveNewEntityPos(id, newPosition);
   };
 
+  const handleArrowDoubleClick = (rel) => {
+    setEditingRelId(rel.id);
+    setEditingRelInfo(rel.info || "");
+  };
+
+  const handleRelInfoSubmit = () => {
+    if (editingRelId) {
+      updateRelationshipInfo(editingRelId, editingRelInfo);
+      setEditingRelId(null);
+      setEditingRelInfo("");
+    }
+  };
+
+  const handleRelInfoCancel = () => {
+    setEditingRelId(null);
+    setEditingRelInfo("");
+  };
+
   useEffect(() => {
     loadWorld();
   }, []);
-
-  
 
   return (
     <div style={{ padding: "20px" }}>
@@ -145,6 +171,37 @@ export default function WorldView() {
           onClose={() => setShowRelForm(false)}
           entities={entities}
         />
+      )}
+
+      {editingRelId && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: "white",
+            padding: "20px",
+            border: "1px solid #ccc",
+            borderRadius: "6px",
+            boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+            zIndex: 10000,
+          }}
+        >
+          <h3>Edit Relationship</h3>
+          <input
+            type="text"
+            value={editingRelInfo}
+            onChange={(e) => setEditingRelInfo(e.target.value)}
+            placeholder="Relationship info..."
+            style={{ width: "100%", marginBottom: "10px" }}
+            autoFocus
+          />
+          <button onClick={handleRelInfoSubmit}>Save</button>
+          <button onClick={handleRelInfoCancel} style={{ marginLeft: "10px" }}>
+            Cancel
+          </button>
+        </div>
       )}
   
       <Xwrapper>
@@ -172,20 +229,7 @@ export default function WorldView() {
             return null;
           })}
           
-          {arrowsReady && relationships?.map((rel) => {
-            const startEl = document.getElementById(`entity-${rel.e1.id}`);
-            const endEl = document.getElementById(`entity-${rel.e2.id}`);
-            
-            console.log("Arrow debug:", {
-              relId: rel.id,
-              startId: `entity-${rel.e1.id}`,
-              endId: `entity-${rel.e2.id}`,
-              startEl: startEl,
-              endEl: endEl,
-              startRect: startEl?.getBoundingClientRect(),
-              endRect: endEl?.getBoundingClientRect()
-            });
-            
+          {arrowsReady && relationships?.map((rel) => {            
             return (
               <Xarrow
                 key={rel.id}
@@ -194,7 +238,31 @@ export default function WorldView() {
                 strokeWidth={2}
                 color="black"
                 showHead={false}
-                label={rel.info}
+                label={{
+                  middle: (
+                    <div
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        handleArrowDoubleClick(rel);
+                      }}
+                      style={{
+                        background: "white",
+                        padding: "6px 10px",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        border: "2px solid #333",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        minWidth: "80px",
+                        textAlign: "center",
+                        userSelect: "none",
+                      }}
+                      title="Double-click to edit"
+                    >
+                      {rel.info || "Double-click to edit"}
+                    </div>
+                  ),
+                }}
               />
             );
           })}

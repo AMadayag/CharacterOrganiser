@@ -9,26 +9,28 @@ import characterOrg.model.util.Position;
 public class Entity {
   private int id = (int)(Math.random() * 1000);
   private String name;
-  private String notes;
+  private String notes = "";
   private Position position;
-  private Colour colour;
+  private Colour colour = Colour.BLACK;
   private EntityType type;
   private String style = "Default";
-  private List<Integer> relatives = new ArrayList<Integer>();
+  private List<Relative> relatives = new ArrayList<Relative>();
 
   public Entity(Position pos, String name, String type) {
     this.name = name;
-    this.notes = "";
     this.position = pos;
-    this.colour = Colour.BLACK;
     this.type = EntityType.setEntityType(type);
   }
 
-  public List<Integer> getRelatives() {
+  public List<Relative> getRelatives() {
     return this.relatives;
   }
 
-  public void addRelative(int r) {
+  public void addRelative(Entity e) {
+    if (e.equals(this)) {
+      return;
+    }
+    Relative r = new Relative(e);
     this.relatives.add(r);
   }
 
@@ -86,5 +88,14 @@ public class Entity {
 
   public String getNotes() {
     return this.notes;
+  }
+
+  public Relative getRelativeFromId(int id) {
+    for (Relative rel : this.relatives) {
+      if (rel.getEntity().getId() == id) {
+        return rel;
+      }
+    }
+    return null;
   }
 }

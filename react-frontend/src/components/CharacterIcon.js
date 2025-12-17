@@ -1,86 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import CharacterOptions from "./CharacterOptions";
 import { iconStyle } from "./iconOverlays";
-import { useXarrow } from "react-xarrows";
-
-function CharacterOptions({ data, onStyleChange, onNameChange, position, onNotesChange }) {
-  const [notes, setNotes] = useState("");
-  const [relatives, setRelatives] = useState([]);
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      const res = await fetch(
-        `http://localhost:8080/api/world/entity/${data.id}/notes`
-      );
-      const text = await res.text();
-      setNotes(text);
-    };
-
-    const fetchRelatives = async () => {
-      const res = await fetch(
-        `http://localhost:8080/api/world/entity/${data.id}/relatives`
-      );
-      const r = await res.json();
-      setRelatives(r);
-    }
-
-    fetchRelatives();
-    fetchNotes();
-  }, [data.id]);
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: `${position.x + 170}px`,
-        top: `${position.y + 25}px`,
-        background: "white",
-        padding: "10px",
-        border: "1px solid #ccc",
-        borderRadius: "6px",
-        boxShadow: "0 0 5px rgba(0,0,0,0.3)",
-        zIndex: 1000,
-      }}
-    >
-      <input
-        type="text"
-        value={data.name}
-        onChange={(e) => onNameChange(data.id, e.target.value)}
-        placeholder="Name"
-        style={{ width: "100%", marginBottom: "6px" }}
-      />
-
-      <select
-        value={data.style}
-        onChange={(e) => onStyleChange(data.id, e.target.value)}
-        style={{ width: "100%" }}
-      >
-        {Object.keys(iconStyle).map((key) => (
-          <option key={key} value={key}>
-            {key}
-          </option>
-        ))}
-      </select>
-
-      <details>
-        <summary style={{ marginTop: "6px", cursor: "pointer", fontWeight: "bold" }}>
-          Notes
-        </summary>
-        <input
-          type="text"
-          value={notes}
-          onChange={(e) => {
-            const newNotes = e.target.value;
-            setNotes(newNotes);
-            onNotesChange(data.id, newNotes);
-          }}
-          placeholder="Notes"
-          style={{ width: "100%", marginTop: "6px" }}
-        />
-      </details>
-      
-    </div>
-  );
-}
 
 export default function CharacterIcon({
   data,
@@ -89,92 +9,120 @@ export default function CharacterIcon({
   onNameChange,
   onNotesChange,
 }) {
-  const [dragging, setDragging] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
-  const offset = useRef({ x: 0, y: 0 });
-  const updateXarrow = useXarrow();
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const iconRef = useRef(null);
 
   const handleMouseDown = (e) => {
-    if (e.target.tagName === "SELECT" || e.target.tagName === "INPUT") return;
-
+    if (e.button !== 0) return;
+    
+    setIsDragging(true);
+    const rect = iconRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
     e.preventDefault();
-    setDragging(true);
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    offset.current = {
-      x: e.clientX - data.position.x,
-      y: e.clientY - data.position.y,
-    };
   };
 
-  const handleDoubleClick = () => {
-    setShowOptions((prev) => !prev);
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+
+    const container = iconRef.current.parentElement;
+    const containerRect = container.getBoundingClientRect();
+
+    const newX = e.clientX - containerRect.left - dragOffset.x;
+    const newY = e.clientY - containerRect.top - dragOffset.y;
+
+    onMove(data.id, { x: newX, y: newY });
   };
 
-  useEffect(() => {
-    if (!dragging) return;
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
-    const handleMouseMove = (e) => {
-      const newPos = {
-        x: e.clientX - offset.current.x,
-        y: e.clientY - offset.current.y,
-      };
+  const handleClick = (e) => {
+    if (!isDragging) {
+      setShowOptions(!showOptions);
+    }
+  };
 
-      onMove(data.id, newPos);
-      updateXarrow();
-    };
-
-    const handleMouseUp = () => setDragging(false);
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [dragging, onMove, data.id, updateXarrow]);
+  const position = data.position || { x: 0, y: 0 };
+  const style = iconStyle[data.style] || iconStyle.Default;
 
   return (
     <>
       <div
         id={`entity-${data.id}`}
+        ref={iconRef}
         className="character-icon"
         style={{
           position: "absolute",
-          left: `${data.position.x}px`,
-          top: `${data.position.y}px`,
-          width: "90px",
-          height: "110px",
-          cursor: dragging ? "grabbing" : "grab",
-          zIndex: 10,
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: "150px",
+          height: "150px",
+          cursor: isDragging ? "grabbing" : "grab",
+          userSelect: "none",
         }}
         onMouseDown={handleMouseDown}
-        onDoubleClick={handleDoubleClick}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onDoubleClick={handleClick}
       >
-        <img
-          src="images/characterIcon/CharacterIconBust.png"
-          alt="Character"
-          className="icon"
-          draggable={false}
-        />
-
-        {data.style && iconStyle[data.style] && (
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          {/* Base image */}
           <img
-            src={iconStyle[data.style]}
-            alt={data.style}
-            className="overlay-icon"
-            draggable={false}
+            src="/images/characterIcon/CharacterIconBust.png"
+            alt={data.name}
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              pointerEvents: "none",
+            }}
           />
-        )}
-
-        <p className="character-name">{data.name}</p>
+          
+          {/* Overlays */}
+          {style && (
+            <img
+              src={style}
+              alt="base overlay"
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+        </div>
+        
+        <div
+          style={{
+            position: "absolute",
+            bottom: "-20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: "14px",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+            background: "rgba(255,255,255,0.9)",
+            padding: "2px 6px",
+            borderRadius: "3px",
+          }}
+        >
+          {data.name}
+        </div>
       </div>
 
-      {showOptions && data.position && (
+      {showOptions && (
         <CharacterOptions
           data={data}
-          position={data.position}
+          position={position}
           onStyleChange={onStyleChange}
           onNameChange={onNameChange}
           onNotesChange={onNotesChange}

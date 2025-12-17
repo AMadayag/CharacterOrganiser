@@ -32,8 +32,8 @@ public class World {
   }
 
   public void addRelationship(Entity e1, Entity e2) {
-    e1.addRelative(e2.getId());
-    e2.addRelative(e1.getId());
+    e1.addRelative(e2);
+    e2.addRelative(e1);
 
     Relationship newR = new Relationship(e1, e2);
     this.relationships.add(newR);
