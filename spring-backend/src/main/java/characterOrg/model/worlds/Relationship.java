@@ -1,4 +1,4 @@
-package characterOrg.model;
+package characterOrg.model.worlds;
 
 public class Relationship {
   private Entity e1;

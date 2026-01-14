@@ -1,12 +1,12 @@
 package characterOrg.controller;
 
-import characterOrg.model.Entity;
-import characterOrg.model.Relative;
-import characterOrg.model.World;
 import characterOrg.model.request.EntityRequest;
 import characterOrg.model.request.PositionRequest;
 import characterOrg.model.request.RelationshipRequest;
 import characterOrg.model.util.Position;
+import characterOrg.model.worlds.Entity;
+import characterOrg.model.worlds.Relative;
+import characterOrg.model.worlds.World;
 
 import java.util.List;
 import java.util.Map;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/world")
-public class WorldController {
-
-    private World world = new World();  // single global world
+public class Controller {
+    
+    private World world = new World();
 
     @GetMapping
     public World getWorld() {

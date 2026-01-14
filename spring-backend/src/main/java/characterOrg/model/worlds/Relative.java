@@ -1,4 +1,4 @@
-package characterOrg.model;
+package characterOrg.model.worlds;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -5,6 +5,8 @@ import "./CharacterIcon.css";
 import RelationshipForm from "./RelationshipForm";
 import Xarrow, { Xwrapper } from "react-xarrows";
 
+import Stack from '@mui/material/Stack';
+
 export default function WorldView() {
   const [world, setWorld] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -154,17 +156,22 @@ export default function WorldView() {
   return (
     <div style={{ padding: "20px" }}>
       <h1>World: {world?.name}</h1>
-      <button onClick={() => setShowForm(true)}>Add Character</button>
-  
+      <Stack spacing={2} direction="row">
+        <button
+          variant="outlined"
+          onClick={() => setShowForm(true)}>Add Character
+        </button>
+    
+        <button onClick={() => setShowRelForm(true)}>Add Relationship</button>
+      </Stack>
+
       {showForm && (
         <CharacterForm
           onSubmit={addCharacter}
           onClose={() => setShowForm(false)}
         />
       )}
-  
-      <button onClick={() => setShowRelForm(true)}>Add Relationship</button>
-  
+
       {showRelForm && (
         <RelationshipForm
           onSubmit={addRelationship}

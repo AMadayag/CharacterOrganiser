@@ -1,4 +1,4 @@
-package characterOrg.model;
+package characterOrg.model.worlds;
 
 import java.util.ArrayList;
 import java.util.List;
